@@ -28,8 +28,9 @@
 </section>
 
 <div class="galerie">
-<img id="app1" src="images/appartement1.jpg" alt="appartement 1">
-<img id="app2" src="images/appartement2.jpg" alt="appartement 2">
+  <img id="app1" src="images/appartement1.jpg" alt="appartement 1">
+  <img id="app2" src="images/appartement2.jpg" alt="appartement 2">
+</div>
 
 <script>
 function matchSize(srcId, targetId){
@@ -37,25 +38,39 @@ function matchSize(srcId, targetId){
   const tgt = document.getElementById(targetId);
   if(!src || !tgt) return;
 
+  // cacher la cible avant le dimensionnement pour éviter un flash
+  tgt.style.visibility = 'hidden';
+  tgt.style.display = 'block';
+  tgt.style.objectFit = 'cover';
+
   function apply(){
-    // récupérer la taille affichée (après CSS/responsive)
     const rect = src.getBoundingClientRect();
-    // appliquer au target (en px)
     tgt.style.width = Math.round(rect.width) + 'px';
     tgt.style.height = Math.round(rect.height) + 'px';
-    tgt.style.objectFit = 'cover';
-    // optionnel : même affichage en bloc
-    tgt.style.display = 'block';
+    tgt.style.visibility = 'visible';
   }
 
-  // appliquer après chargement et au redimensionnement
-  if (src.complete) apply();          // si déjà chargé
+  // appliquer si déjà chargé
+  if (src.complete) apply();
+
+  // appliquer après le chargement si ce n'est pas déjà le cas
   src.addEventListener('load', apply);
-  window.addEventListener('resize', apply);
+
+  // suivre les redimensionnements (responsive)
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(apply);
+    ro.observe(src);
+    // (optionnel) ro.observe(tgt); // si tu veux surveiller la cible aussi
+  } else {
+    // fallback
+    window.addEventListener('resize', apply);
+  }
 }
 
+// appel simple (ton emplacement actuel du script est OK)
 matchSize('app1','app2');
 </script>
+
 
   
 </body>
